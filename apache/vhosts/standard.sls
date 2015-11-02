@@ -21,13 +21,16 @@ include:
     - watch_in:
       - module: apache-reload
 
+{% if site.get('DocumentRoot') != False %}
 {{ id }}-documentroot:
   file.directory:
     - unless: test -d {{ documentroot }}
     - name: {{ documentroot }}
     - makedirs: True
+{% endif %}
 
 {% if grains.os_family == 'Debian' %}
+{% if site.get('enabled') %}
 a2ensite {{ id }}{{ apache.confext }}:
   cmd:
     - run
@@ -36,6 +39,16 @@ a2ensite {{ id }}{{ apache.confext }}:
       - file: /etc/apache2/sites-available/{{ id }}{{ apache.confext }}
     - watch_in:
       - module: apache-reload
+{% else %}
+a2dissite {{ id }}{{ apache.confext }}:
+  cmd:
+    - run
+    - onlyif: test -f /etc/apache2/sites-enabled/{{ id }}{{ apache.confext }}
+    - require:
+      - file: /etc/apache2/sites-available/{{ id }}{{ apache.confext }}
+    - watch_in:
+      - module: apache-reload
+{% endif %}
 {% endif %}
 
 {% endfor %}
