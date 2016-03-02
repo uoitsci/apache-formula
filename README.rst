@@ -101,6 +101,11 @@ Enables and configures the Apache module mod_remoteip using data from Pillar. (D
 
 Replace default vhost with own version. By default, it's 503 code. (Debian Only)
 
+``apache.no_default_vhost``
+--------------------------
+
+Remove the default vhost. (Debian Only)
+
 ``apache.vhosts.standard``
 --------------------------
 
@@ -115,6 +120,16 @@ Example Pillar:
         example.com: # must be unique; used as an ID declaration in Salt; also passed to the template context as {{ id }}
           template_file: salt://apache/vhosts/standard.tmpl
 
+When using the provided templates, one can use a space separated list
+of interfaces to bind to. For example, to bind both IPv4 and IPv6:
+	
+.. code:: yaml
+
+    apache:
+      sites:
+        example.com:
+          interface: '1.2.3.4 [2001:abc:def:100::3]'
+	  
 ``apache.manage_security``
 --------------------------
 
