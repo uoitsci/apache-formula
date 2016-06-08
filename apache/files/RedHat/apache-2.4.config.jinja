@@ -1,3 +1,4 @@
+{% from "apache/map.jinja" import apache with context %}
 #
 # This is the main Apache HTTP server configuration file.  It contains the
 # configuration directives that give the server its instructions.
@@ -39,7 +40,35 @@ ServerRoot "/etc/httpd"
 # prevent Apache from glomming onto all bound IP addresses.
 #
 #Listen 12.34.56.78:80
+
+# Managed by saltstack
+
+{% if salt['pillar.get']('apache:sites') is mapping %}
+    {%- set listen_directives = [] %}
+    {%- for id, site in salt['pillar.get']('apache:sites').items() %}
+        {%- set interfaces = site.get('interface', '*').split() %}
+        {%- set port = site.get('port', 80) %}
+        {%- for interface in interfaces %}
+            {%- set listen_directive = interface ~ ':' ~ port %}
+            {%- if listen_directive not in listen_directives %}
+                {%- do listen_directives.append(listen_directive) %}
+            {%- endif %}
+        {%- endfor %}
+    {%- endfor %}
+    {%- for listen in listen_directives %}
+Listen  {{ listen }}
+    {%- endfor %}
+{%- else %}
 Listen 80
+
+<IfModule mod_ssl.c>
+    Listen 443
+</IfModule>
+
+<IfModule mod_gnutls.c>
+    Listen 443
+</IfModule>
+{%- endif %}
 
 #
 # Dynamic Shared Object (DSO) Support
@@ -116,7 +145,7 @@ ServerAdmin root@localhost
 # documents. By default, all requests are taken from this directory, but
 # symbolic links and aliases may be used to point to other locations.
 #
-DocumentRoot "/var/www/html"
+DocumentRoot "{{ apache.wwwdir }}"
 
 #
 # Relax access to content within /var/www.
@@ -128,7 +157,7 @@ DocumentRoot "/var/www/html"
 </Directory>
 
 # Further relax access to the default document root:
-<Directory "/var/www/html">
+<Directory "{{ apache.wwwdir }}">
     #
     # Possible values for the Options directive are "None", "All",
     # or any combination of:
@@ -179,7 +208,7 @@ DocumentRoot "/var/www/html"
 # logged here.  If you *do* define an error logfile for a <VirtualHost>
 # container, that host's errors will be logged there and not here.
 #
-ErrorLog "logs/error_log"
+ErrorLog "{{ apache.logdir }}/error_log"
 
 #
 # LogLevel: Control the number of messages logged to the error_log.
@@ -217,7 +246,7 @@ LogLevel warn
     # If you prefer a logfile with access, agent, and referer information
     # (Combined Logfile Format) you can use the following directive.
     #
-    CustomLog "logs/access_log" combined
+    CustomLog "{{ apache.logdir }}/access_log" combined
 </IfModule>
 
 <IfModule alias_module>
@@ -357,5 +386,8 @@ EnableSendfile on
 # Supplemental configuration
 #
 # Load config files in the "/etc/httpd/conf.d" directory, if any.
-IncludeOptional conf.d/*.conf
-IncludeOptional vhosts.d/*.conf
+IncludeOptional {{ apache.confdir }}/*.conf
+{% if apache.vhostdir != apache.confdir %}
+IncludeOptional {{ apache.vhostdir }}/*.conf
+{% endif %}
+

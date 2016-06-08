@@ -18,6 +18,7 @@
     'LogFormat': site.get('LogFormat', '"%h %l %u %t \\\"%r\\\" %>s %O"'),
     'CustomLog': site.get('CustomLog', '{0}/{1}-access.log'.format(map.logdir, sitename)),
     
+    'ProxyRequests': site.get('ProxyRequests', 'Off'),
     'ProxyPreserveHost': site.get('ProxyPreserveHost', 'On'),
     'ProxyRoute': site.get('ProxyRoute', {}),
 } %}
@@ -44,17 +45,18 @@
     SSLCertificateChainFile {{ site.SSLCertificateChainFile}}
     {%   endif %}
     {% endif %}
-
+    ProxyRequests {{ vals.ProxyRequests }}
     ProxyPreserveHost {{ vals.ProxyPreserveHost }}    
     {% for proxy, proxyargs in vals.ProxyRoute|dictsort|reverse %}
     {% set proxyvals = {
         'ProxyPassSource': proxyargs.get('ProxyPassSource', '/'),
         'ProxyPassTarget': proxyargs.get('ProxyPassTarget', 'https://{0}'.format(sitename)),
+        'ProxyPassTargetOptions': proxyargs.get('ProxyPassTargetOptions', ''),
         'ProxyPassReverseSource': proxyargs.get('ProxyPassReverseSource', '/'),
         'ProxyPassReverseTarget': proxyargs.get('ProxyPassReverseTarget', site.get('ProxyPassTarget', 'https://{0}'.format(sitename))),
     } %}
     ######### {{proxy}} #########
-    ProxyPass               {{ proxyvals.ProxyPassSource }} {{ proxyvals.ProxyPassTarget }}
+    ProxyPass               {{ proxyvals.ProxyPassSource }} {{ proxyvals.ProxyPassTarget }} {{ proxyvals.ProxyPassTargetOptions }}
     ProxyPassReverse        {{ proxyvals.ProxyPassReverseSource }} {{ proxyvals.ProxyPassReverseTarget }}
     {% endfor %}
     {% if site.get('Formula_Append') %}
