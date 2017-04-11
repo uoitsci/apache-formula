@@ -25,6 +25,11 @@ Installs the Apache package and starts the service.
 
 Configures apache based on os_family
 
+``apache.certificates``
+-----------------
+
+Deploy SSL certificates from pillars
+
 ``apache.mod_mpm``
 ------------------
 
@@ -74,6 +79,11 @@ Installs and Enables the mod_pagespeed module. (Debian and RedHat Only)
 -------------------
 
 Installs and enables the mod_perl2 module (Debian and FreeBSD only)
+
+``apache.mod_geoip``
+-------------------
+
+Installs and enables the mod_geoIP (RedHat only)
 
 ``apache.mod_php5``
 -------------------
@@ -177,6 +187,11 @@ Configures Apache's security.conf options by reassinging them using data from Pi
 ----------------------
 
 Installs and configures Apache on Debian and Ubuntu systems.
+
+``apache.uninstall``
+----------
+
+Stops the Apache service and uninstalls the package.
 
 These states are ordered using the ``order`` declaration. Different stages
 are divided into the following number ranges:
