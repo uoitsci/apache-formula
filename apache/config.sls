@@ -9,6 +9,10 @@ include:
     - require:
       - pkg: apache
     - watch_in:
+      - module: apache-restart
+    - require_in:
+      - module: apache-restart
+      - module: apache-reload
       - service: apache
 
 {{ apache.configfile }}:
@@ -19,9 +23,13 @@ include:
     - require:
       - pkg: apache
     - watch_in:
+      - module: apache-restart
+    - require_in:
+      - module: apache-restart
+      - module: apache-reload
       - service: apache
     - context:
-      apache: {{ apache }}
+      apache: {{ apache | json }}
 
 {{ apache.vhostdir }}:
   file.directory:
@@ -29,6 +37,10 @@ include:
     - require:
       - pkg: apache
     - watch_in:
+      - module: apache-restart
+    - require_in:
+      - module: apache-restart
+      - module: apache-reload
       - service: apache
 
 {% if grains['os_family']=="Debian" %}
@@ -40,6 +52,10 @@ include:
     - require:
       - pkg: apache
     - watch_in:
+      - module: apache-restart
+    - require_in:
+      - module: apache-restart
+      - module: apache-reload
       - service: apache
 
 {{ apache.portsfile }}:
@@ -50,9 +66,13 @@ include:
     - require:
       - pkg: apache
     - watch_in:
+      - module: apache-restart
+    - require_in:
+      - module: apache-restart
+      - module: apache-reload
       - service: apache
     - context:
-      apache: {{ apache }}
+      apache: {{ apache | json }}
 
 {% endif %}
 
@@ -62,6 +82,10 @@ include:
     - require:
       - pkg: apache
     - watch_in:
+      - module: apache-restart
+    - require_in:
+      - module: apache-restart
+      - module: apache-reload
       - service: apache
 {% endif %}
 
@@ -74,9 +98,13 @@ include:
     - require:
       - pkg: apache
     - watch_in:
+      - module: apache-restart
+    - require_in:
+      - module: apache-restart
+      - module: apache-reload
       - service: apache
     - context:
-      apache: {{ apache }}
+      apache: {{ apache | json }}
 {% endif %}
 
 {% if grains['os_family']=="FreeBSD" %}
@@ -88,6 +116,10 @@ include:
     - require:
       - pkg: apache
     - watch_in:
+      - module: apache-restart
+    - require_in:
+      - module: apache-restart
+      - module: apache-reload
       - service: apache
 
 {{ apache.portsfile }}:
@@ -98,7 +130,11 @@ include:
     - require:
       - pkg: apache
     - watch_in:
+      - module: apache-restart
+    - require_in:
+      - module: apache-restart
+      - module: apache-reload
       - service: apache
     - context:
-      apache: {{ apache }}
+      apache: {{ apache | json }}
 {% endif %}

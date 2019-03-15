@@ -2,13 +2,11 @@
 
 include:
   - apache
+  - apache.config
 
-{% if grains['os_family']=="FreeBSD" %}
-
-{{ apache.modulesdir }}/040_mod_cgi.conf:
+{{apache.confdir}}/server-status{{apache.confext}}:
   file.managed:
-    - source: salt://apache/files/{{ salt['grains.get']('os_family') }}/mod_cgi.conf.jinja
-    - mode: 644
+    - source: salt://apache/files/server-status.conf.jinja
     - template: jinja
     - require:
       - pkg: apache
@@ -18,5 +16,3 @@ include:
       - module: apache-restart
       - module: apache-reload
       - service: apache
-
-{% endif %}
