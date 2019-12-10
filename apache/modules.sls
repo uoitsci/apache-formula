@@ -2,8 +2,17 @@
 
 include:
   - apache
+{%- set existing_states = salt['cp.list_states']() %}
+{%- for module in salt['pillar.get']('apache:modules:enabled', []) %}
+{%- set mod_state = 'apache.mod_{}'.format(module) %}
+{%- if mod_state in existing_states %}
+  - {{ mod_state }}
+{%- endif %}
+{%- endfor %}
 
 {% for module in salt['pillar.get']('apache:modules:enabled', []) %}
+{%- set mod_state = 'apache.mod_{}'.format(module) %}
+{% if mod_state not in existing_states %}
 a2enmod {{ module }}:
   cmd.run:
     - unless: ls /etc/apache2/mods-enabled/{{ module }}.load
@@ -16,6 +25,7 @@ a2enmod {{ module }}:
       - module: apache-restart
       - module: apache-reload
       - service: apache
+{% endif %}
 {% endfor %}
 
 {% for module in salt['pillar.get']('apache:modules:disabled', []) %}
@@ -37,7 +47,7 @@ a2dismod -f {{ module }}:
 
 include:
   - apache
- 
+
 {% for module in salt['pillar.get']('apache:modules:enabled', []) %}
 find /etc/httpd/ -name '*.conf' -type f -exec sed -i -e 's/\(^#\)\(\s*LoadModule.{{ module }}_module\)/\2/g' {} \;:
   cmd.run:
@@ -72,7 +82,7 @@ find /etc/httpd/ -name '*.conf' -type f -exec sed -i -e 's/\(^\s*LoadModule.{{ m
 
 include:
   - apache
- 
+
 {% for module in salt['pillar.get']('apache:modules:enabled', []) %}
 a2enmod {{ module }}:
   cmd.run:
